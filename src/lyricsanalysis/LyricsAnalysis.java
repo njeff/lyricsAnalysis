@@ -6,7 +6,6 @@ package lyricsanalysis;
 
 /**
  *
- * 
  * @author Jeffrey
  */
 public class LyricsAnalysis {
