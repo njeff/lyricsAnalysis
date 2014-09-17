@@ -9,6 +9,7 @@ import java.io.StringReader;
 
 /**
  * Gets the relative position of the words and weights them based on position
+ * !!!!! May be removed because TagHelperTools won't take it into consideration !!!!!
  * 
  * @author Jeffrey
  */
