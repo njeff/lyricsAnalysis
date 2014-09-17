@@ -7,3 +7,5 @@ Libraries in use:
 - jLayer
 - jAudioTagger
 - HtmlUnit
+- WEKA
+- TagHelper Tools
