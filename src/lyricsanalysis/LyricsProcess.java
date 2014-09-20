@@ -161,13 +161,14 @@ public class LyricsProcess {
      * Cleans up raw lyrics from Button7 (XML)
      * 
      * @param raw_lyrics
+     * @param timeflag Output with timestamp
      * @return Formatted lyrics
      */
-    public String cleanup7(String raw_lyrics){
+    public String cleanup7(String raw_lyrics, boolean timeflag){
         String lyrics = "";
         try {
             boolean start = false;
-            boolean firstline = false;
+            boolean firstline = true;
             String line = null;
             float time = 0;
             String l_lyrics = null;
@@ -192,8 +193,22 @@ public class LyricsProcess {
                     
                     if(q1 != -1){
                         time = Float.parseFloat(line.substring(q1+1, q2))/1000;
-                        l_lyrics = line.substring(q3+1, q4);                 
-                        lyrics += time + " " + l_lyrics + "\n";
+                        l_lyrics = line.substring(q3+1, q4);  
+                        if(timeflag){
+                            if(firstline){
+                                lyrics += time + " " + l_lyrics;
+                                firstline = false;
+                            } else {
+                                lyrics += "\n" + time + " " + l_lyrics;
+                            }
+                        } else {
+                            if(firstline){
+                                lyrics += l_lyrics;
+                                firstline = false;
+                            } else {
+                                lyrics += "\n" + l_lyrics;
+                            }
+                        }
                     }
                 }
 
