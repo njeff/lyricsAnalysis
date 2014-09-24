@@ -59,15 +59,21 @@ public class LyricsAnalysis {
             
             LyricsProcess lyric = new LyricsProcess();
             String uLyrics = lyric.webgrab(title,artist); //get lyrics
-            String c_lyrics = lyric.cleanup7(uLyrics,true); //clean up
-            String nt_lyrics = lyric.cleanup7(uLyrics, false); //clean up (without timestamp)
+            String c_lyrics = "";
+            String nt_lyrics = "";
+                c_lyrics = lyric.cleanup7(uLyrics,true); //clean up
+                nt_lyrics = lyric.cleanup7(uLyrics, false); //clean up (without timestamp)
             System.out.println(c_lyrics);
 
             WordSpeed speed = new WordSpeed(c_lyrics);
             speed.computeSpeed();
 
             CSVWriter writer = new CSVWriter();
-            writer.CSVIndiv(speed.getAvgSpeed(),nt_lyrics,-1,title); //write to CSV
+            writer.CSVIndiv(speed.getAvgSpeed(),nt_lyrics,1,title); //write to CSV
+            writer.CSVModel("..\\mp3csv","model");
         }
+        
+        BigramTagger tagger = new BigramTagger("..\\TagHelper Tools\\TagHelperTools2","../../model.csv");
+        tagger.makeArffTrain();
     }
 }

@@ -14,18 +14,27 @@ import java.util.logging.Logger;
  * @author Jeffrey
  */
 public class BigramTagger {
-    String path = null; //path to csv file
+    String cpath = null; //path to csv file
+    String tpath = null;
     
-    public BigramTagger(String path){
-        this.path = path;
+    /**
+     * Creates a BigramTagger
+     * 
+     * @param tpath Path of the TagHelperTools2 directory
+     * @param cpath Path to the CSV file
+     */
+    public BigramTagger(String tpath, String cpath){
+        this.cpath = cpath;
+        this.tpath = tpath + "\\";
     }
     
     /**
      * Runs TagHelperTools to create arff for training
+     * .arff files are stored in the TagHelperTools2/ARFF directory
      */
-    private void makeArffTrain(){
+    public void makeArffTrain(){
         try {
-            Process p = Runtime.getRuntime().exec("runtht -ng -lang eng -f uni -f bi -f posbi -noev -cl [weka.classifiers.bayes.NaiveBayes]");
+            Process p = Runtime.getRuntime().exec(tpath + "runtht.bat -ng -lang eng -f uni -f bi -f posbi -noev -cl [weka.classifiers.trees.RandomForest] " + cpath);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -34,7 +43,7 @@ public class BigramTagger {
     /**
      * Runs TagHelperTools to create arff for classification
      */
-    private void makeArffSong(){
+    public void makeArffSong(){
         
     }
 }

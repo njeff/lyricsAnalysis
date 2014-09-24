@@ -24,8 +24,9 @@ public class CSVWriter {
      * Creates a CSV file for a set of multiple songs (for training model)
      * 
      * @param dir Directory of csv files to put together
+     * @param name Name of csv file
      */
-    public void CSVModel(String dir){
+    public void CSVModel(String dir, String name){
         String complete = "";
         
         File[] csv = new File(dir).listFiles();
@@ -35,9 +36,10 @@ public class CSVWriter {
                
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\model.csv","UTF-8");
-            writer.println("category,speed,text");
-            writer.println(complete);
+            writer = new PrintWriter("..\\" + name + ".csv","UTF-8");
+            writer.println("category,text,speed");
+            writer.print(complete);
+            System.out.println(complete);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -50,19 +52,20 @@ public class CSVWriter {
      * 
      * @param speed 
      * @param lyrics
-     * @param category if -1, category isn't written
+     * @param category If -1, category isn't written
+     * @param name Name of csv file
      */
     public void CSVIndiv(float speed, String lyrics, int category, String name){
         if(!lyrics.isEmpty()){
             PrintWriter writer = null;
             try {
-                writer = new PrintWriter("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\mp3csv\\" + name + ".csv","UTF-8");
-                if(category == -1){
-                    writer.println("speed,text");
-                    writer.println(speed + ",\"" + lyrics + "\"");
-                } else {
-                    writer.println("category,speed,text");
-                    writer.println(category + "," + speed + ",\"" + lyrics + "\"");
+                writer = new PrintWriter("..\\mp3csv\\" + name + ".csv","UTF-8");
+                if(category == -1){ //no category
+                    writer.println("text,speed");
+                    writer.println("\"" + lyrics + "\",\"" + speed + "\"");
+                } else { //yes category
+                    writer.println("category,text,speed");
+                    writer.println("\"" + category + "\",\"" + lyrics + "\",\"" + speed + "\"");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -76,15 +79,13 @@ public class CSVWriter {
      * Creates a string from a file
      * 
      * @param file File to convert
-     * @return Contents of file
+     * @return Contents of file without the first line
      */
     private String fileString(File file){
         String everything = "";
         try(BufferedReader br = new BufferedReader(new FileReader(file))) {
             StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-            
-            if((line = br.readLine()) != null){}; //skip first line
+            String line = br.readLine(); //skip first line
             
             while ((line = br.readLine()) != null) {
                 sb.append(line);

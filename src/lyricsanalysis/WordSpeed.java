@@ -84,7 +84,7 @@ public class WordSpeed {
      * 1. Consecutive vowels count as one vowel
      * 2. An "e" at the end of the word doesn't count
      * 
-     * @param line the input line
+     * @param line The input line
      */
     private int syllableCounter(String line){
         int numberOfSyllables = 0;
@@ -125,6 +125,13 @@ public class WordSpeed {
         return numberOfSyllables;
     }
     
+    /**
+     * Checks if an array has a character
+     * 
+     * @param arr Array to check
+     * @param targetValue Value to look for
+     * @return True or false
+     */
     private boolean arrayContains(char[] arr, char targetValue){
         for(char c: arr){
 		if(c == targetValue)

@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.text.WordUtils;
 
 /**
  * Grabs lyrics from online and cleans them up
@@ -37,6 +38,7 @@ public class LyricsProcess {
      * @return XML formatted lyrics
      */
     public String webgrab(String title, String artist){ 
+        artist = artist.replaceAll("[é]","e");
         String feat = null; //string for holding featured artists
         int andindex = 0; //position of the "and"
         andindex = artist.indexOf(" & "); //looks for the & symbol
@@ -78,9 +80,17 @@ public class LyricsProcess {
         // Get the first page
         try{
             HtmlPage page1 = webClient.getPage(url); //load azlyrics.com
+            HtmlAnchor a = null;
+            HtmlPage page2 = null;
+            try {
+                a = page1.getAnchorByText(title.replaceAll("[ \t]+$", ""));  
+                page2 = a.click();
+            } catch (Exception e){
+                //e.printStackTrace();
+                a = page1.getAnchorByText(WordUtils.capitalize(title.replaceAll("\\(.*\\)", "").replaceAll("[ \t]+$", "")));
+                page2 = a.click();
+            }
             
-            HtmlAnchor a = page1.getAnchorByText(title);           
-            HtmlPage page2 = a.click();
             //System.out.println(page2.asText()); //debug
         
             HtmlInput i = page2.getHtmlElementById("Button7");
@@ -94,8 +104,8 @@ public class LyricsProcess {
                 lyrics = "NONE FOUND"; //for debugger to find; after the lyrics go throught the lyric cleaner it will return nothing: "" (not null though)
             }
         }
-        catch (IOException | FailingHttpStatusCodeException | ElementNotFoundException e){
-            e.printStackTrace();
+        catch (Exception e){
+            //e.printStackTrace();
         }
         finally {
             webClient.closeAllWindows();
