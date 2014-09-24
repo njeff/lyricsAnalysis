@@ -9,3 +9,4 @@ Libraries in use:
 - HtmlUnit
 - WEKA
 - TagHelper Tools
+- Apache Commons Lang
