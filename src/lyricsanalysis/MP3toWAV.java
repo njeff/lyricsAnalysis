@@ -8,7 +8,8 @@ import java.io.File;
 import javazoom.jl.converter.Converter;
 
 /**
- *
+ * Converts MP3 files to WAV
+ * 
  * @author Jeffrey
  */
 public class MP3toWAV {

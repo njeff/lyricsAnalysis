@@ -41,7 +41,7 @@ public class WordSpeed {
             while((line = in.readLine())!=null){ //iterate thorugh each line
                 t1 = Float.parseFloat(line.substring(0, line.indexOf(" ")));
                 if(t2 != 0){
-                    System.out.println(syllable/(t1-t2));
+                    //System.out.println(syllable/(t1-t2));
                     speedline.add(syllable/(t1-t2));
                 }
                 line = line.substring(line.indexOf(" "));

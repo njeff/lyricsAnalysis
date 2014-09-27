@@ -38,23 +38,29 @@ public class LyricsProcess {
      * @return XML formatted lyrics
      */
     public String webgrab(String title, String artist){ 
+        System.out.println(title);
+        System.out.println(artist);
+        String artistTemp = null;
         artist = artist.replaceAll("[é]","e");
         String feat = null; //string for holding featured artists
         int andindex = 0; //position of the "and"
         andindex = artist.indexOf(" & "); //looks for the & symbol
         if(andindex != -1){ //if found
-            artist = artist.substring(0,andindex); //get the main artist
-            feat = artist.substring(andindex+3, artist.length()); //get the featured artist
+            artistTemp = artist.substring(0,andindex); //get the main artist
+            feat = artist.substring(andindex+3); //get the featured artist
             title = title + " (ft. " + feat + ")"; //combine the featured artist with the title (formatted like the ones found on www.cicyzone.com)
+            artist = artistTemp;
         }
         else{ //if you dont find the symbol
             andindex = artist.indexOf(" and "); //look for the word "and"
             if(andindex != -1){
-                artist = artist.substring(0,andindex); //get the main artist
-                feat = artist.substring(andindex+5, artist.length()); //get the featured artist
+                artistTemp = artist.substring(0,andindex); //get the main artist
+                feat = artist.substring(andindex+5); //get the featured artist
                 title = title + " (ft. " + feat + ")"; //combine the featured artist with the title (formatted like the ones found on www.cicyzone.com)
+                artist = artistTemp;
             }
         }
+        andindex = 0;
         this.title = title;
         this.artist = artist;
         //System.out.println(title);
@@ -176,59 +182,61 @@ public class LyricsProcess {
      */
     public String cleanup7(String raw_lyrics, boolean timeflag){
         String lyrics = "";
-        try {
-            boolean start = false;
-            boolean firstline = true;
-            String line = null;
-            float time = 0;
-            String l_lyrics = null;
-            
-            int q1,q2,q3,q4 = 0;
-            
-            BufferedReader in = new BufferedReader(new StringReader(raw_lyrics)); //initialize a string reader
+        if(raw_lyrics != null){
+            try {
+                boolean start = false;
+                boolean firstline = true;
+                String line = null;
+                float time = 0;
+                String l_lyrics = null;
 
-            while((line = in.readLine())!=null){ //iterate thorugh each line
-                if(line.startsWith("</swf")){ //if a </swf if found (previous line was last)
-                    start = false;
-                }
-                
-                if(start){ //if we are reading lyrics
-                    if(line.toLowerCase().contains("\"0\"")&&(line.toLowerCase().contains(artist.toLowerCase())||line.toLowerCase().contains(title.toLowerCase()))){
-                        line = "";
+                int q1,q2,q3,q4 = 0;
+
+                BufferedReader in = new BufferedReader(new StringReader(raw_lyrics)); //initialize a string reader
+
+                while((line = in.readLine())!=null){ //iterate thorugh each line
+                    if(line.startsWith("</swf")){ //if a </swf if found (previous line was last)
+                        start = false;
                     }
-                    q1 = line.indexOf("\"");
-                    q2 = line.indexOf("\"", q1+1);
-                    q3 = line.indexOf("\"", q2+1);
-                    q4 = line.indexOf("\"", q3+1);
-                    
-                    if(q1 != -1){
-                        time = Float.parseFloat(line.substring(q1+1, q2))/1000;
-                        l_lyrics = line.substring(q3+1, q4);  
-                        if(timeflag){
-                            if(firstline){
-                                lyrics += time + " " + l_lyrics;
-                                firstline = false;
+
+                    if(start){ //if we are reading lyrics
+                        if(line.toLowerCase().contains("\"0\"")&&(line.toLowerCase().contains(artist.toLowerCase())||line.toLowerCase().contains(title.toLowerCase()))){
+                            line = "";
+                        }
+                        q1 = line.indexOf("\"");
+                        q2 = line.indexOf("\"", q1+1);
+                        q3 = line.indexOf("\"", q2+1);
+                        q4 = line.indexOf("\"", q3+1);
+
+                        if(q1 != -1){
+                            time = Float.parseFloat(line.substring(q1+1, q2))/1000;
+                            l_lyrics = line.substring(q3+1, q4);  
+                            if(timeflag){
+                                if(firstline){
+                                    lyrics += time + " " + l_lyrics;
+                                    firstline = false;
+                                } else {
+                                    lyrics += "\n" + time + " " + l_lyrics;
+                                }
                             } else {
-                                lyrics += "\n" + time + " " + l_lyrics;
-                            }
-                        } else {
-                            if(firstline){
-                                lyrics += l_lyrics;
-                                firstline = false;
-                            } else {
-                                lyrics += "\n" + l_lyrics;
+                                if(firstline){
+                                    lyrics += l_lyrics;
+                                    firstline = false;
+                                } else {
+                                    lyrics += "\n" + l_lyrics;
+                                }
                             }
                         }
                     }
-                }
 
-                if(line.startsWith("<swf")){ //if a <swf if found (next line is start of lyrics)
-                    start = true; //make the lyrics start flag true
+                    if(line.startsWith("<swf")){ //if a <swf if found (next line is start of lyrics)
+                        start = true; //make the lyrics start flag true
+                    }
                 }
+                in.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-            in.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
         return lyrics;
      }

@@ -16,7 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Writes CSV files for TagHelper Tools
+ * 
  * @author Jeffrey
  */
 public class CSVWriter {
@@ -24,19 +25,29 @@ public class CSVWriter {
      * Creates a CSV file for a set of multiple songs (for training model)
      * 
      * @param dir Directory of csv files to put together
-     * @param name Name of csv file
+     * @param name Name and directory of csv file
      */
     public void CSVModel(String dir, String name){
         String complete = "";
         
-        File[] csv = new File(dir).listFiles();
+        File[] csv = new File(dir).listFiles(new FilenameFilter(){
+                @Override
+                public boolean accept(File dir, String name){
+                    if(name.toLowerCase().endsWith(".csv")){
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            );
+        
         for(int i = 0; i < csv.length; i++){
             complete += fileString(csv[i]); //put all text into one large string
         }
                
         PrintWriter writer = null;
         try {
-            writer = new PrintWriter("..\\" + name + ".csv","UTF-8");
+            writer = new PrintWriter(name + ".csv","UTF-8");
             writer.println("category,text,speed");
             writer.print(complete);
             System.out.println(complete);
@@ -65,7 +76,7 @@ public class CSVWriter {
                     writer.println("\"" + lyrics + "\",\"" + speed + "\"");
                 } else { //yes category
                     writer.println("category,text,speed");
-                    writer.println("\"" + category + "\",\"" + lyrics + "\",\"" + speed + "\"");
+                    writer.println("\"c." + category + "\",\"" + lyrics + "\",\"" + speed + "\"");
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
