@@ -37,23 +37,23 @@ public class BigramTagger {
      */
     public void makeArffTrain(){
         try {
-            Process p = Runtime.getRuntime().exec(tpath + "runtht.bat");
-            p.waitFor();
-            String line = "";
-            BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            while((line = error.readLine()) != null){
-                System.out.println(line);
-            }
-            error.close();
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = input.readLine()) != null) {
-              System.out.println(line);
-            }
-            input.close();
-            //ProcessBuilder pb = new ProcessBuilder(tpath + "runtht.bat","-ng","-lang","eng","-f","uni","-f","bi","-f","posbi","-noev","-cl","[weka.classifiers.trees.RandomForest] ",cpath);
-            //pb.redirectOutput(Redirect.INHERIT);
-            //pb.redirectError(Redirect.INHERIT);
-            //Process p = pb.start();
+//            Process p = Runtime.getRuntime().exec(tpath + "runtht.bat");
+//            p.waitFor();
+//            String line = "";
+//            BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+//            while((line = error.readLine()) != null){
+//                System.out.println(line);
+//            }
+//            error.close();
+//            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//            while ((line = input.readLine()) != null) {
+//              System.out.println(line);
+//            }
+//            input.close();
+            ProcessBuilder pb = new ProcessBuilder(tpath + "runtht.bat","-ng","-lang","eng","-f","uni","-f","bi","-f","posbi","-noev","-cl","[weka.classifiers.trees.RandomForest] ",cpath);
+            pb.redirectOutput(Redirect.INHERIT);
+            pb.redirectError(Redirect.INHERIT);
+            Process p = pb.start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
