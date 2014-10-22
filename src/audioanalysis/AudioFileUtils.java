@@ -21,7 +21,7 @@ public class AudioFileUtils {
     /**
      * Splits a WAV file into 20 second segments
      * 
-     * @param files
+     * @param files Directory of WAV files to cut
      * @param dir Directory to place cut up WAV files
      * @throws Exception 
      */  
@@ -51,10 +51,8 @@ public class AudioFileUtils {
                 directory.mkdirs();
                 tempFile.createNewFile();
                 AudioSystem.write(shortstream, AudioFileFormat.Type.WAVE, tempFile);
-
                 //tempFile.delete();
             }
-            
             stream.close();
             shortstream.close();
         }

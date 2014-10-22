@@ -2,13 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package lyricsanalysis;
+package request;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
 import java.io.File;
 import java.io.FilenameFilter;
+import lyricsanalysis.*;
+import audioanalysis.*;
 
 /**
  * Main
@@ -22,7 +24,13 @@ public class LyricsAnalysis {
      */
     public static void main(String[] args) {
         // TODO code application logic here     
-        CSVWriter writeme = new CSVWriter();
+        SelfSimilarity splitter = new SelfSimilarity();
+        try{
+            SelfSimilarity.split(new File("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\Titanium (feat. Sia).wav"),"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium");
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }       
+//        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3
 //        for(int i = 0; i<8;i++){
 //            File musicdir = new File(dir + "\\" + i);
@@ -81,7 +89,7 @@ public class LyricsAnalysis {
 //        }
 //        
 //        writeme.CSVModel("..\\mp3csv","..\\"+"totalmodel");
-        BigramTagger tagger = new BigramTagger("..\\TagHelper Tools\\TagHelperTools2","../../model.csv");
-        tagger.makeArffTrain();
+//        BigramTagger tagger = new BigramTagger("..\\TagHelper Tools\\TagHelperTools2","../../model.csv");
+//        tagger.makeArffTrain();
     }
 }

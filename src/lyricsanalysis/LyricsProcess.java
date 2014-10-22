@@ -64,9 +64,9 @@ public class LyricsProcess {
         this.title = title;
         this.artist = artist;
         //System.out.println(title);
-        //System.out.println(feat);
-        
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17); //Settings from: http://stackoverflow.com/questions/17449826/cannot-get-htmlunit-to-follow-links-on-page-that-uses-a-dopostback-function
+        //System.out.println(feat);    
+        //Settings from: http://stackoverflow.com/questions/17449826/cannot-get-htmlunit-to-follow-links-on-page-that-uses-a-dopostback-function
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17);
         webClient.getOptions().setTimeout(120000);
         webClient.waitForBackgroundJavaScript(60000);
         webClient.getOptions().setRedirectEnabled(true);
