@@ -26,23 +26,32 @@ import javax.swing.JPanel;
 import org.apache.commons.io.FilenameUtils;
 
 /**
- *
+ * Does self-similarity analysis on data
+ * 
  * @author Jeffrey
  */
 
 //F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\titanium - Copy.arff
 //F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\art of war\\art of war.arff
-public class SelfSimilarity extends JPanel{
+public class SelfSimilarity extends JPanel{   
     private Color color = Color.RED;
     final int PAD = 0;
     float max = Float.MIN_VALUE;
     float min = Float.MAX_VALUE;
-    String xDir = "F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\art of war\\art of war.arff";
-    String yDir = "F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\art of war\\art of war.arff";
-    float linesPerSecond = (float)2.746582;
-    ArrayList<Double> fraction = new ArrayList<Double>();
+    String xDir = ""; //directory of the x axis data
+    String yDir = ""; //directory of the y axis data
+    float linesPerSecond = (float)2.746582; //how many lines in the data correspond to one second at a sampling rate of 11.25kHz and window size of 4096 (unsure)  
+    static BufferedImage image; //image of the similarity matrix
     
-    static BufferedImage image;
+    /**
+     * Creates an instance of SelfSimilarity
+     * 
+     * @param data Data to do self-similarity
+     */
+    public SelfSimilarity(String data){
+        xDir = data;
+        yDir = data;
+    }
     
     protected void paintComponent(Graphics g) {
         ValueLoader set1 = new ValueLoader(xDir);
@@ -134,7 +143,7 @@ public class SelfSimilarity extends JPanel{
                         if(difference<min)min=difference;
 
                         difference = map(difference, min, 1, 0, 1);
-                        difference = (float)Math.pow(difference, 5); //create more contrast between similar and non similar vectors //
+                        difference = (float)Math.pow(difference, 5); //create more contrast between similar and non similar vectors
                         if(difference>1) difference=1; //just in case
                         if(difference<0) difference=0;
 
@@ -254,8 +263,15 @@ public class SelfSimilarity extends JPanel{
           return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min; 
     }
     
-    // doesn't handle vectors of magnitude zero
-    public static float cosSim(double[] a, double[] b){
+    /**
+     * Calculates the cosine similarity of two vectors
+     * Doesn't handle inputs of zero
+     * 
+     * @param a Vector a
+     * @param b Vector b
+     * @return Cosine similarity
+     */
+    private static float cosSim(double[] a, double[] b){
         if(a.length!=b.length) return 0;
         float dot = 0;
         float aMag = 0;
@@ -271,7 +287,7 @@ public class SelfSimilarity extends JPanel{
         return (dot/(aMag*bMag));     
     }
     
-    public void maxMin(float val){
+    private void maxMin(float val){
         if(val>max){
             this.max = val;
         }
@@ -280,7 +296,13 @@ public class SelfSimilarity extends JPanel{
         }
     }
     
-    public static double stdDev(double[] data){ //calculates standard deviation of a sample
+    /**
+     * Calculates the standard deviation of a sample
+     * 
+     * @param data Array of data to calculate s.d. for
+     * @return The standard deviation
+     */
+    private static double stdDev(double[] data){
         double n = 0;
         double mean =  0;
         double M2 = 0;
@@ -306,10 +328,10 @@ public class SelfSimilarity extends JPanel{
      * @param dir Directory of output
      * @throws Exception 
      */
-    public static void split(File file, String dir) throws Exception{
+    public void split(File file, String dir) throws Exception{
         JFrame f = new JFrame();
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.add(new SelfSimilarity());
+        f.add(new SelfSimilarity(xDir));
         f.setSize(1000,1000);
         f.setLocation(10,10);
         f.setVisible(true);
