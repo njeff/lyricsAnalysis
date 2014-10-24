@@ -26,7 +26,7 @@ public class jAudioRunner {
      * 
      * @param songDir Directory of the files with songs
      * @param batchFile Directory oof the batchfile
-     * @param outputDir Full path to .arff output (including file and file extension)
+     * @param outputFile Full path to .arff output (including file and file extension)
      */
     public void run(String songDir, String batchFile, String outputFile){
         try{

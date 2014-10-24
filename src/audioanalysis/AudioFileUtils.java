@@ -64,7 +64,7 @@ public class AudioFileUtils {
      * @param filename MP3
      * @param dest WAV
      */
-    public void convert(String filename, String dest){
+    public static void convert(String filename, String dest){
         Converter mp3wav = new Converter();
         try {
             mp3wav.convert(filename,dest);
@@ -78,7 +78,7 @@ public class AudioFileUtils {
      * 
      * @param filename 
      */
-    public void delete(String filename){
+    public static void delete(String filename){
         File file = new File(filename);
         file.delete();
     }

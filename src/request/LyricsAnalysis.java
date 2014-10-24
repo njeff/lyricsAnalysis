@@ -24,9 +24,9 @@ public class LyricsAnalysis {
      */
     public static void main(String[] args) {
         // TODO code application logic here     
-        SelfSimilarity splitter = new SelfSimilarity();
+        SelfSimilarity splitter = new SelfSimilarity("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\titanium - Copy.arff");
         try{
-            SelfSimilarity.split(new File("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\Titanium (feat. Sia).wav"),"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium");
+            splitter.split(new File("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\Titanium (feat. Sia).wav"),"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium");
         }catch(Exception ex){
             ex.printStackTrace();
         }       

@@ -4,6 +4,7 @@
  */
 package audioanalysis;
 
+import com.jhlabs.image.GaussianFilter;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -33,7 +34,7 @@ import org.apache.commons.io.FilenameUtils;
 
 //F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\titanium - Copy.arff
 //F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\art of war\\art of war.arff
-public class SelfSimilarity extends JPanel{   
+public class SelfSimilarity{   
     private Color color = Color.RED;
     final int PAD = 0;
     float max = Float.MIN_VALUE;
@@ -41,7 +42,8 @@ public class SelfSimilarity extends JPanel{
     String xDir = ""; //directory of the x axis data
     String yDir = ""; //directory of the y axis data
     float linesPerSecond = (float)2.746582; //how many lines in the data correspond to one second at a sampling rate of 11.25kHz and window size of 4096 (unsure)  
-    static BufferedImage image; //image of the similarity matrix
+    BufferedImage base = new BufferedImage(1000,1000,BufferedImage.TYPE_INT_ARGB);
+    BufferedImage gImage = new BufferedImage(1000,1000, BufferedImage.TYPE_INT_ARGB);
     
     /**
      * Creates an instance of SelfSimilarity
@@ -53,20 +55,19 @@ public class SelfSimilarity extends JPanel{
         yDir = data;
     }
     
-    protected void paintComponent(Graphics g) {
+    private void paintG() {
         ValueLoader set1 = new ValueLoader(xDir);
         ValueLoader set2 = new ValueLoader(yDir);
         float max = 1;
         float min = (float)0.98;
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D)g;
+        Graphics2D g2 = base.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                             RenderingHints.VALUE_ANTIALIAS_ON);
         Font font = new Font("Serif", Font.PLAIN, 10);
         g2.setFont(font);
         
-        int w = getWidth();
-        int h = getHeight();
+        int w = base.getWidth();
+        int h = base.getHeight();
              
         // Draw ordinate.
         //g2.draw(new Line2D.Double(PAD, PAD, PAD, h-PAD));
@@ -186,62 +187,62 @@ public class SelfSimilarity extends JPanel{
 //        }
           
         /////////////////////////////Logic to get transistion points\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\      
-        float mean = 0;
-        double[] column = new double[image.getWidth()];
-        for(int x = 0; x<image.getWidth();x++){
-            for(int y = (int)(image.getWidth()*0.45); y<(image.getHeight()*0.55);y++){
-                int RGB = image.getRGB(x, y);
-                int red = (RGB>>16)&255; //get the intensity of the red (or any other color)
-                //System.out.println(red);
-                column[x] += red; //add up the entire column
-            }
-            if(x>0){
-                //System.out.println(Math.abs((Math.pow(((column[x]-column[x-1])/100),2))));
-                mean += Math.abs((Math.pow(((column[x]-column[x-1])/100),2))); //get sum of (weighted differences between columns)
-                column[x-1] = Math.abs((Math.pow(((column[x]-column[x-1])/100),2))); //write the weighted value to the column
-            }
-        }
-     
-        ArrayList<Integer> list = new ArrayList<Integer>(); //list for points with large transitions
-        int length = column.length;
-        mean = mean/(length-1); //get mean
-        double sd = stdDev(column); //get standard deviation
-        //System.out.println(mean);
-        //System.out.println(sd);
-        double runningAvg = 0;
-        for(int j = 0; j<length; j++){
-            if(j>5 && (length-j>10)){
-                runningAvg = (column[j] + column[j-1] + column[j-2] + column[j-3] + column[j-4] + column[j-5])/6; //running avg
-                //System.out.println(intermediate);
-            }
-            //todo: create better transition detection code
-            if((runningAvg>(mean+0.75*sd))){ //add to list of good transition points
-                list.add(j);
-            }
-        }
-        
-        //prevents lines very close together from being drawn multiple times
-        //todo: draw the mean of a group instead of the first (may not be helpful actually)
-        int previous = 0;
-        //int avg = 0;
-        //int groupSize = 0;
-        for(Iterator<Integer> it = list.iterator(); it.hasNext();){
-            int current = it.next();
-            if((current-previous)>5){ //draw the first in a group
-                //if(groupSize == 0) groupSize = 1;
-                //if(avg == 0) avg = current;
-                //avg = avg/groupSize;
-                //groupSize = 0;
-                setColor(1,0,0);
-                g2.setPaint(color);
-                g2.draw(new Line2D.Double(PAD+current*getWidth()/length, PAD, PAD+current*getWidth()/length, h-PAD)); //draw line
-                //avg = 0;
-            } //else { //if still in a group
-            //    avg += current;
-            //    groupSize++;
-            //}
-            previous = current;
-        }
+//        float mean = 0;
+//        double[] column = new double[base.getWidth()];
+//        for(int x = 0; x<base.getWidth();x++){
+//            for(int y = (int)(base.getWidth()*0.45); y<(base.getHeight()*0.55);y++){
+//                int RGB = base.getRGB(x, y);
+//                int red = (RGB>>16)&255; //get the intensity of the red (or any other color)
+//                //System.out.println(red);
+//                column[x] += red; //add up the entire column
+//            }
+//            if(x>0){
+//                //System.out.println(Math.abs((Math.pow(((column[x]-column[x-1])/100),2))));
+//                mean += Math.abs((Math.pow(((column[x]-column[x-1])/100),2))); //get sum of (weighted differences between columns)
+//                column[x-1] = Math.abs((Math.pow(((column[x]-column[x-1])/100),2))); //write the weighted value to the column
+//            }
+//        }
+//     
+//        ArrayList<Integer> list = new ArrayList<Integer>(); //list for points with large transitions
+//        int length = column.length;
+//        mean = mean/(length-1); //get mean
+//        double sd = stdDev(column); //get standard deviation
+//        //System.out.println(mean);
+//        //System.out.println(sd);
+//        double runningAvg = 0;
+//        for(int j = 0; j<length; j++){
+//            if(j>5 && (length-j>10)){
+//                runningAvg = (column[j] + column[j-1] + column[j-2] + column[j-3] + column[j-4] + column[j-5])/6; //running avg
+//                //System.out.println(intermediate);
+//            }
+//            //todo: create better transition detection code
+//            if((runningAvg>(mean+0.75*sd))){ //add to list of good transition points
+//                list.add(j);
+//            }
+//        }
+//        
+//        //prevents lines very close together from being drawn multiple times
+//        //todo: draw the mean of a group instead of the first (may not be helpful actually)
+//        int previous = 0;
+//        //int avg = 0;
+//        //int groupSize = 0;
+//        for(Iterator<Integer> it = list.iterator(); it.hasNext();){
+//            int current = it.next();
+//            if((current-previous)>5){ //draw the first in a group
+//                //if(groupSize == 0) groupSize = 1;
+//                //if(avg == 0) avg = current;
+//                //avg = avg/groupSize;
+//                //groupSize = 0;
+//                setColor(1,0,0);
+//                g2.setPaint(color);
+//                g2.draw(new Line2D.Double(PAD+current*base.getWidth()/length, PAD, PAD+current*base.getWidth()/length, h-PAD)); //draw line
+//                //avg = 0;
+//            } //else { //if still in a group
+//            //    avg += current;
+//            //    groupSize++;
+//            //}
+//            previous = current;
+//        }
     }
  
     public Color getColor() {
@@ -250,7 +251,6 @@ public class SelfSimilarity extends JPanel{
 
     public void setColor(float r, float g, float b) {
             this.color = new Color(r,g,b);
-            repaint();
     }
         
     /*
@@ -286,16 +286,7 @@ public class SelfSimilarity extends JPanel{
         //System.out.println((dot/(aMag*bMag)));
         return (dot/(aMag*bMag));     
     }
-    
-    private void maxMin(float val){
-        if(val>max){
-            this.max = val;
-        }
-        if(val<min){
-            this.min = val;
-        }
-    }
-    
+
     /**
      * Calculates the standard deviation of a sample
      * 
@@ -329,32 +320,65 @@ public class SelfSimilarity extends JPanel{
      * @throws Exception 
      */
     public void split(File file, String dir) throws Exception{
-        JFrame f = new JFrame();
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.add(new SelfSimilarity(xDir));
-        f.setSize(1000,1000);
-        f.setLocation(10,10);
-        f.setVisible(true);
-        image = new BufferedImage(f.getWidth(),f.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = image.createGraphics();
-        f.paint(g2);
+        paintG();
         
         ////////////////////////// Find transitions \\\\\\\\\\\\\\\\\\\\\\\\\\\
+        float sobelX[][] = {{-1,0,1},
+                            {-2,0,2},
+                            {-1,0,1}};
+        float sobelY[][] = {{1,2,1},
+                            {0,0,0},
+                            {-1,-2,-1}};
+
+        //System.out.println(image.getHeight());
+        float columnadd = 0;
         float mean = 0;
-        double[] column = new double[image.getWidth()];
-        for(int x = 0; x<image.getWidth();x++){
-            for(int y = (int)(image.getWidth()*0.45); y<(image.getHeight()*0.55);y++){
-                int RGB = image.getRGB(x, y);
-                int red = (RGB>>16)&255; //get the intensity of the red (or any other color)
-                //System.out.println(red);
-                column[x] += red; //add up the entire column
-            }
-            if(x>0){
-                //System.out.println(Math.abs((Math.pow(((column[x]-column[x-1])/100),2))));
-                mean += Math.abs((Math.pow(((column[x]-column[x-1])/100),2))); //get sum of (weighted differences between columns)
-                column[x-1] = Math.abs((Math.pow(((column[x]-column[x-1])/100),2))); //write the weighted value to the column
-            }
-        }
+
+        GaussianFilter filter = new GaussianFilter(10);
+        gImage = filter.filter(base, gImage);
+        
+        double[] column = new double[gImage.getWidth()-2];
+        for(int x = 1; x<gImage.getWidth()-2;x++){
+               for(int y = 1; y<gImage.getHeight()-2;y++){
+                   //System.out.println("Hello");
+                   int RGB1 = gImage.getRGB(x-1,y-1);
+                   RGB1 = (RGB1>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB2 = gImage.getRGB(x, y-1);
+                   RGB2 = (RGB2>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB3 = gImage.getRGB(x+1, y-1);
+                   RGB3 = (RGB3>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB4 = gImage.getRGB(x-1, y);
+                   RGB4 = (RGB4>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB5 = gImage.getRGB(x, y);
+                   RGB5 = (RGB5>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB6 = gImage.getRGB(x+1, y);
+                   RGB6 = (RGB6>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB7 = gImage.getRGB(x-1, y+1);
+                   RGB7 = (RGB7>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB8 = gImage.getRGB(x, y+1);
+                   RGB8 = (RGB8>>16)&255; //get the intensity of the red (or any other color)
+                   int RGB9 = gImage.getRGB(x+1, y+1);
+                   RGB9 = (RGB9>>16)&255; //get the intensity of the red (or any other color)
+                   //System.out.println(RGB5);
+                   //column[x] += red; //add up the entire column
+                   //sobel operator: convolute with image
+                   float gX = RGB1*sobelX[0][0] + RGB2*sobelX[0][1] + RGB3*sobelX[0][2] +
+                           RGB4*sobelX[1][0] + RGB5*sobelX[1][1] + RGB6*sobelX[1][2] +
+                           RGB7*sobelX[2][0] + RGB8*sobelX[2][1] + RGB9*sobelX[2][2];
+                   float gY =  RGB1*sobelY[0][0] + RGB2*sobelY[0][1] + RGB3*sobelY[0][2] +
+                           RGB4*sobelY[1][0] + RGB5*sobelY[1][1] + RGB6*sobelY[1][2] +
+                           RGB7*sobelY[2][0] + RGB8*sobelY[2][1] + RGB9*sobelY[2][2];
+                   gX = gX/256;
+                   gY = gY/256;
+                   double gS = Math.sqrt(Math.pow(gX,2)+Math.pow(gY,2)); //get magnitude
+                   //System.out.println(gS);
+                   columnadd += gS; //add up the column
+               }
+               //System.out.println(columnadd);
+               mean += columnadd;
+               column[x] = columnadd;
+               columnadd = 0;
+           }
      
         ArrayList<Integer> list = new ArrayList<Integer>(); //list for points with large transitions
         ArrayList<Integer> glist = new ArrayList<Integer>(); //list of cleaned (good) transition points
@@ -362,16 +386,10 @@ public class SelfSimilarity extends JPanel{
         int length = column.length;
         mean = mean/(length-1); //get mean
         double sd = stdDev(column); //get standard deviation
-        //System.out.println(mean);
-        //System.out.println(sd);
-        double runningAvg = 0;
+        System.out.println(mean);
+        System.out.println(sd);
         for(int j = 0; j<length; j++){
-            if(j>5 && (length-j>10)){
-                runningAvg = (column[j] + column[j-1] + column[j-2] + column[j-3] + column[j-4] + column[j-5])/6; //running avg
-                //System.out.println(intermediate);
-            }
-            //todo: create better transition detection code
-            if((runningAvg>(mean+0.75*sd))){ //add to list of good transition points
+            if((column[j]>(mean+1.75*sd))){ //add to list of good transition points
                 list.add(j);
             }
         }
@@ -390,7 +408,7 @@ public class SelfSimilarity extends JPanel{
         int previous = 0;
         for(Iterator<Integer> it = list.iterator(); it.hasNext();){
             int current = it.next();
-            if((current-previous)>5){ //if the point is far enough from the last one
+            if((current-previous)>30){ //if the point is far enough from the last one (each pixel is 0.24 seconds, so 30 pixels is 7.2 sec)
                 glist.add(current); //add it to the list
             } 
             previous = current;
