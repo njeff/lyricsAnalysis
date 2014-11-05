@@ -10,3 +10,4 @@ Libraries in use:
 - WEKA
 - TagHelper Tools
 - Apache Commons Lang
+- jhlabs.com Image Library

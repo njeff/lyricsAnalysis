@@ -7,9 +7,14 @@ package audioanalysis;
 import jAudioFeatureExtractor.ACE.DataTypes.Batch;
 import jAudioFeatureExtractor.ACE.XMLParsers.XMLDocumentParser;
 import jAudioFeatureExtractor.DataModel;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Runs jAudio (adapted from previous year's code)
@@ -17,52 +22,59 @@ import java.io.FilenameFilter;
  * @author Jeffrey
  */
 public class jAudioRunner {
-    String xmlDir = "";
-    public jAudioRunner(String xmlDir){
-        this.xmlDir = xmlDir;
-    }
+    String xmlOut = "";
+    String batchFile = "";
     
     /**
+     * Instantiates jAudioRunner
      * 
-     * @param songDir Directory of the files with songs
-     * @param batchFile Directory oof the batchfile
+     * @param batchFile Full batch file directory
+     * @param definitionOutput XML definition output
+     */
+    jAudioRunner(String batchFile, String definitionOutput){
+        this.batchFile = batchFile;
+        this.xmlOut = definitionOutput;
+    }
+       
+    /**
+     * Runs jAudio feature extractor
+     * 
+     * @param songPath Path of the song
      * @param outputFile Full path to .arff output (including file and file extension)
      */
-    public void run(String songDir, String batchFile, String outputFile){
+    void run(String songPath, String outputFile){
         try{
-            String mdir = "songDir"; //directory for songs
-            File musicdir = new File(mdir);
-            File allfiles[]= musicdir.listFiles(new FilenameFilter(){
-                @Override
-                public boolean accept(File dir, String name){
-                    if(name.toLowerCase().endsWith(".wav")){
-                        return true;
-                    }
-                    return false;
-                }
+            File song = new File(songPath);
+            if(song.getName().toLowerCase().endsWith(".wav")){
+                System.out.println(song.getName());
+            } else {
+                System.out.println("Invalid File.");
+                return;
             }
-            ); 
-            int windowSize = 512; //size of the analysis window in samples
+            File allfiles[]= {song};
+            
+            int windowSize = 4096; //size of the analysis window in samples
             double windowOverlap = 0; //percent overlap as a value between 0 and 1
-            double samplingRate = 44100; //number of samples per second
+            double samplingRate = 11025; //number of samples per second
             boolean normalize = false; //should the file be normalized before execution
-            boolean perWindow = false; //should features be extracted on a window by window basis
-            boolean overall = true; //should global features be extracted
+            boolean perWindow = true; //should features be extracted on a window by window basis
+            boolean overall = false; //should global features be extracted
             int outputType = 1; //what output format should extracted features be stored in
-            String featureLocation = this.xmlDir; //location of the feature definition file
+            String featureLocation = xmlOut; //location of the feature definition file
 
             Object[] o = new Object[] {};
             try {
-                    o = (Object[]) XMLDocumentParser.parseXMLDocument(batchFile, //location of XML file with batch settings
+                    o = (Object[]) XMLDocumentParser.parseXMLDocument(this.batchFile, //location of file with batch settings (make sure the "dummy file" is valid!
                                     "batchFile");
             } catch (Exception e) {
                     System.out.println("Error parsing the batch file");
                     System.out.println(e.getMessage());
+                    e.printStackTrace();
                     System.exit(3);
             }
             String featureDestination;
             Batch b;
-            DataModel dm = new DataModel("features.xml",null);
+            DataModel dm = new DataModel("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\Libraries\\jAudio\\features.xml",null);
             for (int i = 0; i < o.length; ++i) {
                 featureDestination = outputFile; //location where extracted features should be stored
                 b = (Batch) o[i];
@@ -77,5 +89,46 @@ public class jAudioRunner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Removes header from jAudio output
+     * 
+     * @param input Path to .arff
+     */
+    static void jAudioCleaner(String input){
+        String line = "";
+        String complete = "";
+        boolean save = false;
+        try(BufferedReader br = new BufferedReader(new FileReader(input))){
+            while((line = br.readLine()) != null){
+                if(save){
+                    complete += line + System.getProperty("line.separator");
+                }
+                if(line.equals("@DATA")){
+                    save = true;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        if(!complete.isEmpty()){
+            PrintWriter out = null;
+            try{
+                out = new PrintWriter(input);
+                out.print(complete.trim()); //remove all trailing space and save to file
+                out.close();
+            } catch (Exception ex){
+                ex.printStackTrace();
+            } finally {
+                try{
+                    out.close();
+                } catch (Exception ex){
+                    
+                }
+            }
+        }
+        
     }
 }

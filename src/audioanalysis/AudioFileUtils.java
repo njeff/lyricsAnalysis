@@ -13,7 +13,7 @@ import javazoom.jl.converter.Converter;
 import org.apache.commons.io.FilenameUtils;
 
 /**
- * Converts MP3 files to WAV
+ * Audio File Utilities
  * 
  * @author Jeffrey
  */

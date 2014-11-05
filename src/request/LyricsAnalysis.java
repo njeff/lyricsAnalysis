@@ -22,14 +22,10 @@ public class LyricsAnalysis {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        // TODO code application logic here     
-        SelfSimilarity splitter = new SelfSimilarity("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\titanium - Copy.arff");
-        try{
-            splitter.split(new File("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium\\Titanium (feat. Sia).wav"),"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\titanium");
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }       
+    public static void main(String[] args) {   
+        
+        SubSong.createSubSong("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\similarity tests\\art of war\\speed\\the art of war.wav");
+  
 //        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3
 //        for(int i = 0; i<8;i++){
