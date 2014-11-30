@@ -2,6 +2,11 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/database/LyricsAccess.java</file>
+            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lyricsanalysis/LyricsProcess.java</file>
+            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/request/LyricsAnalysis.java</file>
+            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lastfm/TagRequest.java</file>
+        </group>
     </open-files>
 </project-private>

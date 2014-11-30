@@ -10,7 +10,7 @@ import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
 import java.io.File;
 import java.io.FilenameFilter;
-import lastfm.Request;
+import lastfm.TagRequest;
 import lyricsanalysis.*;
 
 /**
@@ -24,8 +24,7 @@ public class LyricsAnalysis {
      * @param args the command line arguments
      */
     public static void main(String[] args) {  
-        XmlPage xml = Request.getXmlResults("excited");
-        Request.getTitles(xml);
+        TagRequest.getTitles("happy");
 //        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3
 //        for(int i = 0; i<8;i++){
@@ -70,7 +69,7 @@ public class LyricsAnalysis {
 //                LyricsProcess lyric = new LyricsProcess();
 //                String uLyrics = lyric.webgrab("Love is Gone","David Guetta"); //get lyrics
 //                String c_lyrics = "";
-//                String nt_lyrics = "";
+//                String nt_lyrics = ""; //no timestamp
 //                c_lyrics = lyric.cleanup7(uLyrics,true); //clean up
 //                nt_lyrics = lyric.cleanup7(uLyrics, false); //clean up (without timestamp)
 //                System.out.println(c_lyrics);

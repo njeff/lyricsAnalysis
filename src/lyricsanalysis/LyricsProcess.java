@@ -85,7 +85,7 @@ public class LyricsProcess {
         
         // Get the first page
         try{
-            HtmlPage page1 = webClient.getPage(url); //load azlyrics.com
+            HtmlPage page1 = webClient.getPage(url); //load cicyzone.com
             HtmlAnchor a = null;
             HtmlPage page2 = null;
             try {
