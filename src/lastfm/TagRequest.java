@@ -27,6 +27,7 @@ public class TagRequest {
      * 
      * @param tag The tag we want to search with
      * @param page Page number
+     * @return The results page
      */
     public static XmlPage getXmlResults(String tag, int page){
         //initalize browser

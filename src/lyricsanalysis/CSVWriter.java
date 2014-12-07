@@ -61,8 +61,8 @@ public class CSVWriter {
     /**
      * Creates a CSV file for one song (for classification)
      * 
-     * @param speed 
-     * @param lyrics
+     * @param speed The speed of the lyrics
+     * @param lyrics The lyrics to input
      * @param category If -1, category isn't written
      * @param name Name of csv file
      */

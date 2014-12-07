@@ -176,7 +176,7 @@ public class LyricsProcess {
     /**
      * Cleans up raw lyrics from Button7 (XML)
      * 
-     * @param raw_lyrics
+     * @param raw_lyrics The un-cleaned lyrics
      * @param timeflag Output with timestamp
      * @return Formatted lyrics
      */

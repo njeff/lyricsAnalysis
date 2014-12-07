@@ -8,8 +8,11 @@ import com.gargoylesoftware.htmlunit.xml.XmlPage;
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
+import database.LyricsAccess;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.sql.Connection;
+import java.sql.SQLException;
 import lastfm.TagRequest;
 import lyricsanalysis.*;
 
@@ -23,8 +26,13 @@ public class LyricsAnalysis {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {  
-        TagRequest.getTitles("happy");
+    public static void main(String[] args) throws SQLException {  
+        Connection con = LyricsAccess.startconnection("orcl");
+        
+        int[] moods = {0,1};
+        LyricsAccess.saveto(con, "1title", "artist", 10, "lyrics", moods);
+        
+        //TagRequest.getTitles("happy");
 //        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3
 //        for(int i = 0; i<8;i++){
