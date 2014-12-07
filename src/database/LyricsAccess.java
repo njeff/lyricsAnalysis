@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  *
@@ -66,7 +67,7 @@ public class LyricsAccess {
      * @throws SQLException 
      */
     public static void saveto(Connection con, String title, String artist, int length, String lyrics, int[] moods) throws SQLException{
-        //check to see if the artist is already registered
+        ////////////////////////////////check to see if the artist is already registered
         int artistid = 0;
         boolean artistpre = false;
         Statement stmt = null;
@@ -85,7 +86,8 @@ public class LyricsAccess {
             if (stmt != null) { stmt.close(); }
         }
         
-        //if the artist was registered check to see if the song was already registered
+        ////////////////////////////////if the artist was registered check to see if the song was already registered
+        int prevSongID = 0; //place to hold songid of song if it is already registered
         boolean songcheck = false;
         if(artistid != 0){ 
             Statement stmt2 = null;
@@ -95,7 +97,8 @@ public class LyricsAccess {
                 stmt2 = con.createStatement();
                 ResultSet rs = stmt2.executeQuery(query2);
                 if(rs.next()) { //if the song is already registered
-                    songcheck = true; //exit function
+                    prevSongID = rs.getInt("SONGID"); //save its id
+                    songcheck = true;
                 }
             } catch (SQLException e) {
                 System.err.println(e);
@@ -105,42 +108,69 @@ public class LyricsAccess {
         }
              
         int songid = 0;
-        //if the song was already there
-        if(songcheck){
-            return; //exit
-        } else { //find the highest song ID
-            Statement stmt5 = null;
-            String query5 =
-                "SELECT MAX(SONGID) \"MAXid\" FROM SONG_TABLE"; //check to see if the song is already registered
-            try {
-                stmt5 = con.createStatement();
-                ResultSet rs = stmt5.executeQuery(query5);
-                if(rs.next()) { 
-                    songid = rs.getInt("MAXid")+1;
-                }
-            } catch (SQLException e) {
-                System.err.println(e);
-            } finally {
-                if (stmt5 != null) { stmt5.close(); }
-            }
-        }
-        
-        //if artist isn't registered, find the next artistid
-        if(artistid == 0){ 
+        ////////////////////////////////if the song was already there
+        if(songcheck){ //check to see it any moods need to be added
+            ArrayList<Integer> regMoods= new ArrayList<Integer>(); //already registered moods
             Statement stmt3 = null;
             String query3 =
-                "SELECT MAX(ARTISTID) \"MAXid\" FROM ARTIST_TABLE"; //get greatest artist id
+                "SELECT MOOD FROM SONGMOOD_TABLE WHERE SONGID = '" + prevSongID + "'";
             try {
                 stmt3 = con.createStatement();
                 ResultSet rs = stmt3.executeQuery(query3);
-                while (rs.next()) {
-                    artistid = rs.getInt("MAXid")+1; //get the greatest (last inputted) artist id
-                    artistpre = true;                  
+                while(rs.next()) { 
+                    regMoods.add(rs.getInt("MOOD"));
                 }
             } catch (SQLException e) {
                 System.err.println(e);
             } finally {
                 if (stmt3 != null) { stmt3.close(); }
+            }
+            
+            for(int i = 0; i < moods.length; i++){
+                if(!regMoods.contains(moods[i])){ //if the song doesn't have a mood registered yet
+                    PreparedStatement ms = con.prepareStatement("INSERT INTO SONGMOOD_TABLE (SONGID, MOOD) VALUES (?,?)");
+                    ms.setInt(1,prevSongID);
+                    ms.setInt(2,moods[i]); //register that mood
+                    ms.addBatch();
+                    ms.executeBatch();
+                }
+            }
+                
+            return; //exit
+            
+        } else { //find the highest song ID
+            Statement stmt4 = null;
+            String query4 =
+                "SELECT MAX(SONGID) \"MAXid\" FROM SONG_TABLE"; //check to see if the song is already registered
+            try {
+                stmt4 = con.createStatement();
+                ResultSet rs = stmt4.executeQuery(query4);
+                if(rs.next()) { 
+                    songid = rs.getInt("MAXid")+1; //add one to get the next songid
+                }
+            } catch (SQLException e) {
+                System.err.println(e);
+            } finally {
+                if (stmt4 != null) { stmt4.close(); }
+            }
+        }
+        
+        ////////////////////////////////if artist isn't registered, find the next artistid
+        if(artistid == 0){ 
+            Statement stmt5 = null;
+            String query5 =
+                "SELECT MAX(ARTISTID) \"MAXid\" FROM ARTIST_TABLE"; //get greatest artist id
+            try {
+                stmt5 = con.createStatement();
+                ResultSet rs = stmt5.executeQuery(query5);
+                while (rs.next()) {
+                    artistid = rs.getInt("MAXid")+1; //add one to get the next artist id
+                    artistpre = true;                  
+                }
+            } catch (SQLException e) {
+                System.err.println(e);
+            } finally {
+                if (stmt5 != null) { stmt5.close(); }
             }
         }
         
@@ -157,24 +187,24 @@ public class LyricsAccess {
         System.out.println(length);
         
         if(!artistpre){ //if artist was already registered
-            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, LENGTH) VALUES (?,?,?,?,?)");
-            pstmt.setString(1, title); //only insert the song and artist id into the maintable
+            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, LENGTH) VALUES (?,?,?,?,?)"); //insert song
+            pstmt.setString(1, title);
             pstmt.setInt(2, artistid);
             pstmt.setInt(3, songid); 
             pstmt.setString(4, lyrics);
             pstmt.setInt(5, length);
         }
         else{ //if artist wasn't registered before
-            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, LENGTH) VALUES (?,?,?,?,?)"); 
-            pstmt.setString(1, title); //not only insert into the maintable but also insert into the artists table to register new artist
+            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, LENGTH) VALUES (?,?,?,?,?)"); //insert song
+            pstmt.setString(1, title); 
             pstmt.setInt(2, artistid); 
-            pstmt.setInt(3, songid); //insert next songid
-            pstmt.setString(4, lyrics); //insert cleaned lyrics
+            pstmt.setInt(3, songid); 
+            pstmt.setString(4, lyrics); 
             pstmt.setInt(5,length);
             
             pstmt2 = con.prepareStatement("INSERT INTO ARTIST_TABLE (ARTISTNAME, ARTISTID) VALUES (?,?)"); //put the artist and his/her id into the artist table
             pstmt2.setString(1, artist);
-            pstmt2.setInt(2, artistid); //duplicate of the earlier "artistid + 1" for the artist table
+            pstmt2.setInt(2, artistid);
             pstmt2.addBatch();
             pstmt2.executeBatch();
         }
@@ -191,14 +221,13 @@ public class LyricsAccess {
         }
         
         try {
-            int [] updateCounts = pstmt.executeBatch();
+            pstmt.executeBatch();
             con.commit(); //commit changes
             con.setAutoCommit(true); //reenable auto commit
         } catch (SQLException e){
             System.err.println(e);
         } finally {
-            if (pstmt != null) { pstmt.close(); } //close connection
+            if (pstmt != null) { pstmt.close(); }
         }
-        
     }
 }

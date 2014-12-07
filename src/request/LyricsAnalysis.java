@@ -29,7 +29,7 @@ public class LyricsAnalysis {
     public static void main(String[] args) throws SQLException {  
         Connection con = LyricsAccess.startconnection("orcl");
         
-        int[] moods = {0,1};
+        int[] moods = {0,1,2};
         LyricsAccess.saveto(con, "1title", "artist", 10, "lyrics", moods);
         
         //TagRequest.getTitles("happy");
