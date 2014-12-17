@@ -66,7 +66,7 @@ public class LyricsProcess {
         //System.out.println(title);
         //System.out.println(feat);    
         //Settings from: http://stackoverflow.com/questions/17449826/cannot-get-htmlunit-to-follow-links-on-page-that-uses-a-dopostback-function
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17);
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17,"proxery.com",8888);
         webClient.getOptions().setTimeout(120000);
         webClient.waitForBackgroundJavaScript(60000);
         webClient.getOptions().setRedirectEnabled(true);
@@ -250,4 +250,25 @@ public class LyricsProcess {
          seconds += minutes*60;
          return seconds;
      }
+    
+    /**
+     * Converts a multiline string into one line
+     * 
+     * @param input String
+     * @return New string
+     */
+    public static String oneLine(String input){
+        String output = "";
+        try{
+            BufferedReader in = new BufferedReader(new StringReader(input));
+            String line = "";
+        
+            while((line=in.readLine())!=null){
+                output += line + " ";
+            }
+        } catch (Exception e) {
+            
+        }
+        return output;
+    }
 }

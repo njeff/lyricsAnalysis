@@ -5,6 +5,7 @@
  */
 package database;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,9 +13,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
+ * Database-related code
+ * 
  * @author Jeffrey
  */
 public class LyricsAccess {
@@ -57,16 +61,21 @@ public class LyricsAccess {
     
     /**
      * Saves a song to the database
+     * Tables: ARTIST_TABLE
+     *         SONG_TABLE
+     *         SONGMOOD_TABLE
+     *         SUBSONG_TABLE
      * 
      * @param con Database connection
      * @param title Name of the song
      * @param artist Artist of the song
      * @param length Length of the song in seconds
-     * @param lyrics Lyrics of the song
+     * @param lyrics Lyrics of the song without timestamp
+     * @param timeLyrics Lyrics with timestamp
      * @param moods Array of all the possible moods the song is
      * @throws SQLException 
      */
-    public static void saveto(Connection con, String title, String artist, int length, String lyrics, int[] moods) throws SQLException{
+    public static void saveto(Connection con, String title, String artist, int length, String lyrics, String timeLyrics, int[] moods) throws SQLException{
         ////////////////////////////////check to see if the artist is already registered
         int artistid = 0;
         boolean artistpre = false;
@@ -180,27 +189,29 @@ public class LyricsAccess {
         PreparedStatement pstmt2; //for insterting into the artists table
         PreparedStatement pstmt3; //for inserting into the song mood table
         
-        System.out.println(title);
-        System.out.println(artistid);
-        System.out.println(songid);
-        System.out.println(lyrics);
-        System.out.println(length);
+//        System.out.println(title);
+//        System.out.println(artistid);
+//        System.out.println(songid);
+//        System.out.println(lyrics);
+//        System.out.println(length);
         
         if(!artistpre){ //if artist was already registered
-            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, LENGTH) VALUES (?,?,?,?,?)"); //insert song
+            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, TIME_LYRICS, LENGTH) VALUES (?,?,?,?,?,?)"); //insert song
             pstmt.setString(1, title);
             pstmt.setInt(2, artistid);
             pstmt.setInt(3, songid); 
             pstmt.setString(4, lyrics);
-            pstmt.setInt(5, length);
+            pstmt.setString(5, timeLyrics);
+            pstmt.setInt(6, length);
         }
         else{ //if artist wasn't registered before
-            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, LENGTH) VALUES (?,?,?,?,?)"); //insert song
+            pstmt = con.prepareStatement("INSERT INTO SONG_TABLE (SONGNAME, ARTISTID, SONGID, LYRICS, TIME_LYRICS, LENGTH) VALUES (?,?,?,?,?,?)"); //insert song
             pstmt.setString(1, title); 
             pstmt.setInt(2, artistid); 
             pstmt.setInt(3, songid); 
             pstmt.setString(4, lyrics); 
-            pstmt.setInt(5,length);
+            pstmt.setString(5, timeLyrics);
+            pstmt.setInt(6,length);
             
             pstmt2 = con.prepareStatement("INSERT INTO ARTIST_TABLE (ARTISTNAME, ARTISTID) VALUES (?,?)"); //put the artist and his/her id into the artist table
             pstmt2.setString(1, artist);
@@ -228,6 +239,52 @@ public class LyricsAccess {
             System.err.println(e);
         } finally {
             if (pstmt != null) { pstmt.close(); }
+        }
+    }
+    
+    /**
+     * Save subsong moods to the database
+     * 
+     * @param con 
+     */
+    public static void saveSubsong(Connection con){
+        
+    }
+    
+    /**
+     * Dumps lyrics and their moods into a .arff format
+     * 
+     * @param con Database connection
+     */
+    public static void retrieveSave(Connection con){
+        PrintWriter writer = null;
+        Statement stmt = null;
+        try {   
+            writer = new PrintWriter("dump.arff","UTF-8");
+            writer.println("@ATTRIBUTE lyrics string");
+            writer.println("@ATTRIBUTE mood {0,1,2,3,4,5,6,7}");
+            for(int i = 0; i<7; i++){ //loop though each possible mood
+                String query =
+                    "SELECT LYRICS FROM SONG_TABLE INNER JOIN SONGMOOD_TABLE ON SONG_TABLE.SONGID = SONGMOOD_TABLE.SONGID WHERE SONGMOOD_TABLE.MOOD = "+i; 
+            
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+                while (rs.next()) { 
+                    writer.println(rs.getString("LYRICS")+","+i);
+                    System.out.println(rs.getString("LYRICS").trim()+","+i);
+                }
+            }
+        } catch (Exception e) { //error handling
+            System.err.println(e);
+        } finally {
+            writer.close();
+            if (stmt != null) { 
+                try {
+                    stmt.close(); //close connection
+                } catch (SQLException ex) {
+                    Logger.getLogger(LyricsAccess.class.getName()).log(Level.SEVERE, null, ex); //more error handling for the close
+                }
+            }
         }
     }
 }

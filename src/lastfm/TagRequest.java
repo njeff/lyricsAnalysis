@@ -9,12 +9,16 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
+import database.LyricsAccess;
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.sql.Connection;
+import java.util.Random;
 import lyricsanalysis.LyricsProcess;
 
 /**
- *
+ * Get songs from last.fm by tag
+ * 
  * @author Jeffrey
  */
 public class TagRequest {
@@ -52,15 +56,22 @@ public class TagRequest {
         return xml;
     } 
     
+    /**
+     * Gets songs from last.fm (and their lyrics from cicyzone) that have a specific tag
+     * 
+     * @param tag The tag we are searching with
+     */
     public static void getTitles(String tag){
+        Connection con = LyricsAccess.startconnection("orcl");
         int count = 0; //song lyrics count
         int page = 1; //page of lyrics
         
         while(count<50){
             XmlPage xml = getXmlResults(tag,page);
-            if(xml.asXml().contains("error code")){
+            if(xml.asXml().contains("error code")){ //if there was an error, exit
                 return;
             }
+            //System.out.println(xml.asXml());
             try{
                 BufferedReader in = new BufferedReader(new StringReader(xml.asXml()));
 
@@ -69,9 +80,15 @@ public class TagRequest {
                 boolean nameflag = false;
                 boolean artistflag = false;
                 String artist = "";
-                String name = "";            
+                String name = "";      
+                int length = 0;
 
                 while((line = in.readLine())!=null){ //iterate thorugh each line 
+                    if(lastline.trim().equals("<duration>")){
+                        length = Integer.parseInt(line.trim());
+                        //System.out.println(length);
+                    }
+                    
                     if(nameflag){ //song name
                         name = line.trim();
                         //System.out.println(line.trim());
@@ -87,8 +104,24 @@ public class TagRequest {
                         String nt_lyrics = ""; //no timestamp
                         c_lyrics = lyric.cleanup7(uLyrics,true); //clean up
                         nt_lyrics = lyric.cleanup7(uLyrics, false); //clean up (without timestamp)
-                        System.out.println(c_lyrics);
+                        //System.out.println(c_lyrics);
+                        
+                        //random wait time
+                        Random rand = new Random();
+                        int value = 1000*(rand.nextInt(5)+3);
+                        try {
+                            Thread.sleep(value);
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+                        
+                        int moods[] = {1}; //mood to be input, 0-7
+                        
+                        c_lyrics = LyricsProcess.oneLine(c_lyrics);
+                        nt_lyrics = LyricsProcess.oneLine(nt_lyrics);
+                        
                         if(!c_lyrics.isEmpty()){
+                            LyricsAccess.saveto(con, name, artist, length, nt_lyrics, c_lyrics, moods);
                             count++;
                             System.out.println(count);
                         }
