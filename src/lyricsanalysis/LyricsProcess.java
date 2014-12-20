@@ -66,7 +66,7 @@ public class LyricsProcess {
         //System.out.println(title);
         //System.out.println(feat);    
         //Settings from: http://stackoverflow.com/questions/17449826/cannot-get-htmlunit-to-follow-links-on-page-that-uses-a-dopostback-function
-        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17,"proxery.com",8888);
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17);
         webClient.getOptions().setTimeout(120000);
         webClient.waitForBackgroundJavaScript(60000);
         webClient.getOptions().setRedirectEnabled(true);
@@ -203,6 +203,7 @@ public class LyricsProcess {
                         if(line.toLowerCase().contains("\"0\"")&&(line.toLowerCase().contains(artist.toLowerCase())||line.toLowerCase().contains(title.toLowerCase()))){
                             line = "";
                         }
+                        //get positions of all the quotation marks
                         q1 = line.indexOf("\"");
                         q2 = line.indexOf("\"", q1+1);
                         q3 = line.indexOf("\"", q2+1);
@@ -241,7 +242,13 @@ public class LyricsProcess {
         return lyrics;
      }
      
-     private static float cleantime(String raw_time){ //takes a string of time in this format: [MM:SS.SSS] and converts it into seconds
+    /**
+     * Takes a string of time in this format: [MM:SS.SSS] and converts it into seconds
+     * 
+     * @param raw_time Time in MM:SS.SSS format
+     * @return Time in seconds
+     */
+     private static float cleantime(String raw_time){
          int clean_time = 0;
          int colon = raw_time.indexOf(":");
          int minutes = Integer.parseInt(raw_time.substring(1, colon));

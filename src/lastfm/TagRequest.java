@@ -108,7 +108,7 @@ public class TagRequest {
                         
                         //random wait time
                         Random rand = new Random();
-                        int value = 1000*(rand.nextInt(5)+3);
+                        int value = 1000*(rand.nextInt(4)+2);
                         try {
                             Thread.sleep(value);
                         } catch (InterruptedException ex) {
