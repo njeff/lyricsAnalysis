@@ -25,17 +25,13 @@ public class LyricsAnalysis {
 
     /**
      * @param args the command line arguments
+     * 
      */
     public static void main(String[] args) throws SQLException {  
         Connection con = LyricsAccess.startconnection("orcl");
-        
-        LyricsWiki.cleanup(LyricsWiki.grabLyrics("Dynamite", "Taio Cruz"));
-        
-        //int[] moods = {0,1,2};
-        //LyricsAccess.saveto(con, "1title", "artist", 10, "lyrics", moods);
-        
-        //TagRequest.getTitles("joyful");
-        //LyricsAccess.retrieveSave(con);
+                
+        //TagRequest.getTitles("jealousy");
+        //LyricsAccess.retrieveSave(con,"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\WEKA new test\\dump3.arff");
 //        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3
 //        for(int i = 0; i<8;i++){

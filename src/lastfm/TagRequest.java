@@ -15,6 +15,7 @@ import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Random;
 import lyricsanalysis.LyricsProcess;
+import lyricsanalysis.LyricsWiki;
 
 /**
  * Get songs from last.fm by tag
@@ -57,7 +58,7 @@ public class TagRequest {
     } 
     
     /**
-     * Gets songs from last.fm (and their lyrics from cicyzone) that have a specific tag
+     * Gets songs from last.fm (and their lyrics) that have a specific tag and saves this to the database
      * 
      * @param tag The tag we are searching with
      */
@@ -90,7 +91,7 @@ public class TagRequest {
                     }
                     
                     if(nameflag){ //song name
-                        name = line.trim();
+                        name = line.trim().replace("&amp;", "&"); //convert HTML escaped character into normal character
                         //System.out.println(line.trim());
                     }
                     if(artistflag){ //song artist
@@ -100,10 +101,12 @@ public class TagRequest {
                         // Get lyrics from online
                         LyricsProcess lyric = new LyricsProcess();
                         String uLyrics = lyric.webgrab(name,artist); //get lyrics
-                        String c_lyrics = "";
+                        String c_lyrics = ""; //with timestamp
                         String nt_lyrics = ""; //no timestamp
-                        c_lyrics = lyric.cleanup7(uLyrics,true); //clean up
-                        nt_lyrics = lyric.cleanup7(uLyrics, false); //clean up (without timestamp)
+                        //c_lyrics = lyric.cleanup7(uLyrics,true); //clean up
+                        //nt_lyrics = lyric.cleanup7(uLyrics, false); //clean up (without timestamp)
+                        
+                        nt_lyrics = LyricsWiki.cleanup(LyricsWiki.grabLyrics(name, artist)); //get lyrics and clean up
                         //System.out.println(c_lyrics);
                         
                         //random wait time
@@ -115,12 +118,12 @@ public class TagRequest {
                             Thread.currentThread().interrupt();
                         }
                         
-                        int moods[] = {1}; //mood to be input, 0-7
+                        int moods[] = {5}; ///////////mood to be input, 0-7\\\\\\\\\\\
                         
-                        c_lyrics = LyricsProcess.oneLine(c_lyrics);
-                        nt_lyrics = LyricsProcess.oneLine(nt_lyrics);
+                        //c_lyrics = LyricsProcess.oneLine(c_lyrics);
+                        nt_lyrics = LyricsProcess.oneLine(nt_lyrics); //put lyrics in one line
                         
-                        if(!c_lyrics.isEmpty()){
+                        if(!nt_lyrics.isEmpty()){ //if there are lyrics
                             LyricsAccess.saveto(con, name, artist, length, nt_lyrics, c_lyrics, moods);
                             count++;
                             System.out.println(count);

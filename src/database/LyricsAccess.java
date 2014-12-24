@@ -255,25 +255,26 @@ public class LyricsAccess {
      * Dumps lyrics and their moods into a .arff format
      * 
      * @param con Database connection
+     * @param destination File to output to
      */
-    public static void retrieveSave(Connection con){
+    public static void retrieveSave(Connection con, String destination){
         PrintWriter writer = null;
         Statement stmt = null;
         try {   
-            writer = new PrintWriter("F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\WEKA 0-3 test\\dump2.arff","UTF-8");
+            writer = new PrintWriter(destination,"UTF-8");
             writer.println("@RELATION songdump");
             writer.println("@ATTRIBUTE lyrics string");
-            writer.println("@ATTRIBUTE mood {0,1,2,3,4,5,6,7}");
+            writer.println("@ATTRIBUTE class {0,1,2,3,4,5,6,7}");
             writer.println("@DATA");
-            for(int i = 0; i<7; i++){ //loop though each possible mood
+            for(int i = 0; i<8; i++){ //loop though each possible mood
                 String query =
                     "SELECT LYRICS FROM SONG_TABLE INNER JOIN SONGMOOD_TABLE ON SONG_TABLE.SONGID = SONGMOOD_TABLE.SONGID WHERE SONGMOOD_TABLE.MOOD = "+i; 
             
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(query);
                 while (rs.next()) { 
-                    writer.println("\""+rs.getString("LYRICS").trim()+"\","+i);
-                    System.out.println("\""+rs.getString("LYRICS").trim()+"\","+i);
+                    writer.println("\""+rs.getString("LYRICS").trim().replace("\"", "")+"\","+i); //sanitize output
+                    System.out.println("\""+rs.getString("LYRICS").trim().replace("\"", "")+"\","+i);
                 }
             }
         } catch (Exception e) { //error handling
