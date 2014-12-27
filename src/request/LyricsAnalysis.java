@@ -28,10 +28,13 @@ public class LyricsAnalysis {
      * 
      */
     public static void main(String[] args) throws SQLException {  
-        Connection con = LyricsAccess.startconnection("orcl");
-                
+        //Connection con = LyricsAccess.startconnection("orcl");
+        
         //TagRequest.getTitles("jealousy");
-        //LyricsAccess.retrieveSave(con,"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\WEKA new test\\dump3.arff");
+        //LyricsAccess.retrieveSave(con,"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\WEKA new test\\12-26-14dump.arff");
+        
+        TagRequest.albumResults("Believe", "Cher");
+        
 //        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3
 //        for(int i = 0; i<8;i++){

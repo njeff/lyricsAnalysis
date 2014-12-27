@@ -11,7 +11,13 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
 import database.LyricsAccess;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
+import java.net.URL;
 import java.sql.Connection;
 import java.util.Random;
 import lyricsanalysis.LyricsProcess;
@@ -88,8 +94,7 @@ public class TagRequest {
                     if(lastline.trim().equals("<duration>")){
                         length = Integer.parseInt(line.trim());
                         //System.out.println(length);
-                    }
-                    
+                    }                
                     if(nameflag){ //song name
                         name = line.trim().replace("&amp;", "&"); //convert HTML escaped character into normal character
                         //System.out.println(line.trim());
@@ -153,5 +158,107 @@ public class TagRequest {
             
             page++;
         }
+    }
+    
+    /**
+     * Return album information for the given song
+     * 
+     * @param name Name of the song
+     * @param artist Name of the artist
+     * @return 
+     */
+    public static String albumResults(String name, String artist){
+        WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17);
+        webClient.getOptions().setTimeout(120000);
+        webClient.waitForBackgroundJavaScript(60000);
+        webClient.getOptions().setRedirectEnabled(true);
+        webClient.getOptions().setJavaScriptEnabled(true);
+        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
+        webClient.getOptions().setThrowExceptionOnScriptError(false);
+        webClient.getOptions().setCssEnabled(false);
+        webClient.getOptions().setUseInsecureSSL(true);
+        webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+        
+        XmlPage xml = null;
+        try{
+            xml = webClient.getPage("http://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist="+artist+"&track="+name+"&api_key=dd37652a477e74f92d58b48835b9f314");
+            //System.out.println(xml.asXml());
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
+        String album = "";  
+        try{
+            BufferedReader in = new BufferedReader(new StringReader(xml.asXml()));
+
+            String line = "";
+            String lastline = ""; 
+
+            while((line = in.readLine())!=null){ //iterate through each line 
+                if(lastline.trim().contains("<title>")){ //get title of album
+                    //System.out.println(line.trim()); 
+                    album = line.trim();
+                }
+                lastline = line;
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
+        //////////////////////Get album image and release date\\\\\\\\\\\\\\\\\\\\
+        try{
+            xml = webClient.getPage("http://ws.audioscrobbler.com/2.0/?method=album.getInfo&artist="+artist+"&album="+album+"&limit=100&api_key=dd37652a477e74f92d58b48835b9f314");
+            //System.out.println(xml.asXml());
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
+        String releasedate = "";
+        try{
+            BufferedReader in = new BufferedReader(new StringReader(xml.asXml()));
+
+            String line = "";
+            String lastline = ""; 
+            String imageURL = "";
+            
+            while((line = in.readLine())!=null){ //iterate through each line 
+                if(lastline.trim().contains("<image size=\"extralarge\">")){ //get album image
+                    //System.out.println(line.trim()); 
+                    imageURL = line.trim();
+                    saveImage(imageURL,"..\\Album Art\\"+album+".png");
+                }
+                if(lastline.trim().contains("<releasedate>")){ //get album release date
+                    //System.out.println(line.trim());
+                    releasedate = line.trim();
+                }               
+                lastline = line;
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }      
+        return album;
+    }
+    
+    /**
+     * Method from: http://www.avajava.com/tutorials/lessons/how-do-i-save-an-image-from-a-url-to-a-file.html
+     * 
+     * @param imageUrl URL of image
+     * @param destinationFile Image save location
+     * @throws IOException 
+     */
+    public static void saveImage(String imageUrl, String destinationFile) throws IOException {
+        URL url = new URL(imageUrl);
+        InputStream is = url.openStream();
+        OutputStream os = new FileOutputStream(destinationFile);
+
+        byte[] b = new byte[2048];
+        int length;
+
+        while ((length = is.read(b)) != -1) {
+                os.write(b, 0, length);
+        }
+
+        is.close();
+        os.close();
     }
 }
