@@ -162,12 +162,13 @@ public class TagRequest {
     
     /**
      * Return album information for the given song
+     * Result array contains album name, release date, and a URL to the album cover, in that order
      * 
      * @param name Name of the song
      * @param artist Name of the artist
      * @return 
      */
-    public static String albumResults(String name, String artist){
+    public static String[] albumResults(String name, String artist){
         WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17);
         webClient.getOptions().setTimeout(120000);
         webClient.waitForBackgroundJavaScript(60000);
@@ -196,7 +197,7 @@ public class TagRequest {
 
             while((line = in.readLine())!=null){ //iterate through each line 
                 if(lastline.trim().contains("<title>")){ //get title of album
-                    //System.out.println(line.trim()); 
+                    System.out.println(line.trim()); 
                     album = line.trim();
                 }
                 lastline = line;
@@ -214,29 +215,31 @@ public class TagRequest {
         }
         
         String releasedate = "";
+        String imageURL = "";
+        
         try{
             BufferedReader in = new BufferedReader(new StringReader(xml.asXml()));
 
             String line = "";
             String lastline = ""; 
-            String imageURL = "";
             
             while((line = in.readLine())!=null){ //iterate through each line 
                 if(lastline.trim().contains("<image size=\"extralarge\">")){ //get album image
-                    //System.out.println(line.trim()); 
+                    System.out.println(line.trim()); 
                     imageURL = line.trim();
-                    saveImage(imageURL,"..\\Album Art\\"+album+".png");
+                    saveImage(imageURL,"..\\Album Art\\"+album.replace("\\", "")+".png");
                 }
                 if(lastline.trim().contains("<releasedate>")){ //get album release date
-                    //System.out.println(line.trim());
-                    releasedate = line.trim();
+                    System.out.println(line.trim().replace(", 00:00", ""));
+                    releasedate = line.trim().replace(", 00:00", "");
                 }               
                 lastline = line;
             }
         } catch (Exception e){
             e.printStackTrace();
-        }      
-        return album;
+        }  
+        String[] results = {album,releasedate,"..\\Album Art\\"+album.replace("\\", "")+".png"};
+        return results;
     }
     
     /**

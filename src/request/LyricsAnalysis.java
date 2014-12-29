@@ -27,13 +27,18 @@ public class LyricsAnalysis {
      * @param args the command line arguments
      * 
      */
-    public static void main(String[] args) throws SQLException {  
-        //Connection con = LyricsAccess.startconnection("orcl");
+    public static void main(String[] args) {  
+        Connection con = LyricsAccess.startconnection("orcl");
         
         //TagRequest.getTitles("jealousy");
         //LyricsAccess.retrieveSave(con,"F:\\Jeffrey\\Desktop\\Science Project 2014-2015\\WEKA new test\\12-26-14dump.arff");
+        try{
+            LyricsAccess.saveAlbum(con);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
-        TagRequest.albumResults("Believe", "Cher");
+        //TagRequest.albumResults("Believe", "Cher");
         
 //        CSVWriter writeme = new CSVWriter();
 //        String dir = "F:\\Jeffrey\\Music\\Songs\\mp3_1415"; //directory for MP3

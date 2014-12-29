@@ -15,6 +15,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lastfm.TagRequest;
 
 /**
  * Database-related code
@@ -242,10 +243,116 @@ public class LyricsAccess {
         }
     }
     
-    public static void saveAlbum(Connection con, String album){
-        
+    /**
+     * Finds songs without album data and finds album info for them
+     * 
+     * @param con
+     */
+    public static void saveAlbum(Connection con) throws SQLException{
+        int albumid = 0;
+        Statement stmt = null;
+        String query =
+            "SELECT SONG_TABLE.SONGNAME, SONG_TABLE.ARTISTID, SONG_TABLE.ALBUMID, ARTIST_TABLE.ARTISTNAME FROM SONG_TABLE INNER JOIN ARTIST_TABLE ON SONG_TABLE.ARTISTID = ARTIST_TABLE.ARTISTID WHERE ALBUMID IS NULL"; 
+        try {
+            stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet uprs = stmt.executeQuery(query);
+            while (uprs.next()) {
+                //System.out.println(rs.getString("SONGNAME"));
+                String song = uprs.getString("SONGNAME");
+                String artist = uprs.getString("ARTISTNAME");
+                String[] album = TagRequest.albumResults(song,artist);
+                albumid = albumExists(con,album[0],album[1],album[2]);
+                //System.out.println(uprs.getConcurrency());
+                //uprs.updateInt("ALBUMID",albumid);
+                //uprs.updateRow();
+                
+                Statement stmt2 = null;
+                String query2 =
+                    "UPDATE SONG_TABLE SET SONG_TABLE.ALBUMID = " + albumid + " WHERE SONG_TABLE.SONGNAME = '" + song + "' AND SONG_TABLE.ARTISTID = " + uprs.getInt("ARTISTID"); 
+                try {
+                    stmt2 = con.createStatement();
+                    stmt2.executeQuery(query);
+                } catch (SQLException e) {
+                    System.err.println(e);
+                } finally {
+                    if (stmt2 != null) { stmt2.close(); }
+                }
+                
+                try {
+                    Thread.sleep(250); //don't query last.fm too fast
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println(e);
+        } finally {
+            if (stmt != null) { stmt.close(); }
+        }
     }
     
+    /**
+     * Returns the album id of an album
+     * If the album doesn't exist, the album is inserted into the database and its id is returned
+     * 
+     * @param con Database connection
+     * @param album Name of album
+     * @param releaseDate Album's date of release
+     * @param albumPath Path to album cover art
+     * @return 
+     */
+    private static int albumExists(Connection con, String album, String releaseDate, String albumPath){
+        int albumid = -1;
+        try{
+            Statement stmt = null;
+            String query =
+                "SELECT ALBUMID FROM ALBUM_TABLE WHERE ALBUMNAME = '" + album + "'";
+            try {
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(query);
+                if (rs.next()) {
+                    albumid = rs.getInt("ALBUMID");               
+                }
+            } catch (SQLException e) {
+                System.err.println(e);
+            } finally {
+                if (stmt != null) { stmt.close(); }
+            }
+            
+            if(albumid == -1){ //if the album wasn't found
+                //get the nest album id
+                Statement stmt2 = null;
+                String query2 =
+                    "SELECT MAX(ALBUMID) \"MAXid\" FROM ALBUM_TABLE"; //get greatest album id
+                try {
+                    stmt2 = con.createStatement();
+                    ResultSet rs = stmt2.executeQuery(query2);
+                    while (rs.next()) {
+                        albumid = rs.getInt("MAXid")+1; //add one to get the next album id                 
+                    }
+                } catch (SQLException e) {
+                    System.err.println(e);
+                } finally {
+                    if (stmt2 != null) { stmt2.close(); }
+                }
+                
+                //save the new album
+                con.setAutoCommit(false); //disable autocommit
+                PreparedStatement pstmt = con.prepareStatement("INSERT INTO ALBUM_TABLE (ALBUMID, ALBUMNAME, RELEASEDATE, IMAGEPATH) VALUES (?,?,?,?)");
+                pstmt.setInt(1,albumid);
+                pstmt.setString(2, album);
+                pstmt.setString(3, releaseDate);
+                pstmt.setString(4, albumPath);
+                pstmt.addBatch();
+                pstmt.executeBatch();
+                con.commit();
+                con.setAutoCommit(true);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return albumid;
+    }
     
     /**
      * Save subsong moods to the database
@@ -257,7 +364,7 @@ public class LyricsAccess {
     }
     
     /**
-     * Dumps lyrics and their moods into a .arff format
+     * Dumps lyrics and their moods into a .arff file
      * 
      * @param con Database connection
      * @param destination File to output to
