@@ -197,8 +197,8 @@ public class TagRequest {
 
             while((line = in.readLine())!=null){ //iterate through each line 
                 if(lastline.trim().contains("<title>")){ //get title of album
-                    System.out.println(line.trim()); 
-                    album = line.trim();
+                    System.out.println(line.trim().replace("&amp;","&")); 
+                    album = line.trim().replace("&amp;","&");
                 }
                 lastline = line;
             }
@@ -227,18 +227,22 @@ public class TagRequest {
                 if(lastline.trim().contains("<image size=\"extralarge\">")){ //get album image
                     System.out.println(line.trim()); 
                     imageURL = line.trim();
-                    saveImage(imageURL,"..\\Album Art\\"+album.replace("\\", "")+".png");
+                    saveImage(imageURL,"..\\Album Art\\"+FileNameCleaner.cleanFileName(album)+".png");
                 }
                 if(lastline.trim().contains("<releasedate>")){ //get album release date
-                    System.out.println(line.trim().replace(", 00:00", ""));
-                    releasedate = line.trim().replace(", 00:00", "");
+                    if(!line.contains("</releasedate>")){ //if there is date
+                        System.out.println(line.trim().replace(", 00:00", ""));
+                        releasedate = line.trim().replace(", 00:00", "");
+                    } else { //otherwise put nothing
+                        releasedate = "";
+                    }
                 }               
                 lastline = line;
             }
         } catch (Exception e){
             e.printStackTrace();
         }  
-        String[] results = {album,releasedate,"..\\Album Art\\"+album.replace("\\", "")+".png"};
+        String[] results = {album,releasedate,"..\\Album Art\\"+FileNameCleaner.cleanFileName(album)+".png"};
         return results;
     }
     

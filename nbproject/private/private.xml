@@ -5,10 +5,9 @@
         <group>
             <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/database/LyricsAccess.java</file>
             <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lyricsanalysis/LyricsProcess.java</file>
-            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lyricsanalysis/LyricsWiki.java</file>
             <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/request/LyricsAnalysis.java</file>
-            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lyricsanalysis/CSVWriter.java</file>
             <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lastfm/TagRequest.java</file>
+            <file>file:/F:/Jeffrey/Desktop/Science%20Project%202014-2015/LyricsAnalysis/src/lastfm/FileNameCleaner.java</file>
         </group>
     </open-files>
 </project-private>

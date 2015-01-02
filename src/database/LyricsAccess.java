@@ -246,32 +246,32 @@ public class LyricsAccess {
     /**
      * Finds songs without album data and finds album info for them
      * 
-     * @param con
+     * @param con Database connection
      */
     public static void saveAlbum(Connection con) throws SQLException{
         int albumid = 0;
         Statement stmt = null;
-        String query =
+        String query = //query to get list of songs with their artists that don't have an album yet
             "SELECT SONG_TABLE.SONGNAME, SONG_TABLE.ARTISTID, SONG_TABLE.ALBUMID, ARTIST_TABLE.ARTISTNAME FROM SONG_TABLE INNER JOIN ARTIST_TABLE ON SONG_TABLE.ARTISTID = ARTIST_TABLE.ARTISTID WHERE ALBUMID IS NULL"; 
         try {
-            stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            ResultSet uprs = stmt.executeQuery(query);
-            while (uprs.next()) {
-                //System.out.println(rs.getString("SONGNAME"));
-                String song = uprs.getString("SONGNAME");
-                String artist = uprs.getString("ARTISTNAME");
+            stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String song = rs.getString("SONGNAME");
+                String artist = rs.getString("ARTISTNAME");
+                int artistid = rs.getInt("ARTISTID");
                 String[] album = TagRequest.albumResults(song,artist);
                 albumid = albumExists(con,album[0],album[1],album[2]);
-                //System.out.println(uprs.getConcurrency());
-                //uprs.updateInt("ALBUMID",albumid);
-                //uprs.updateRow();
+                System.out.println("ID: "+albumid);
+                System.out.println("NAME: "+song);
+                System.out.println("ARTISTID: "+artistid);
                 
                 Statement stmt2 = null;
-                String query2 =
-                    "UPDATE SONG_TABLE SET SONG_TABLE.ALBUMID = " + albumid + " WHERE SONG_TABLE.SONGNAME = '" + song + "' AND SONG_TABLE.ARTISTID = " + uprs.getInt("ARTISTID"); 
+                String query2 = //query to insert albumid into the song table
+                    "UPDATE SONG_TABLE SET SONG_TABLE.ALBUMID = " + albumid + " WHERE SONG_TABLE.SONGNAME = '" + song.replace("'","''") + "' AND SONG_TABLE.ARTISTID = " + artistid; 
                 try {
                     stmt2 = con.createStatement();
-                    stmt2.executeQuery(query);
+                    stmt2.executeQuery(query2);
                 } catch (SQLException e) {
                     System.err.println(e);
                 } finally {
